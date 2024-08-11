@@ -1,6 +1,8 @@
-# vr-nft-web
+# MetaSphere
 
-## Web Screenshot Img
+### MetaSphere Logo
+
+![meta_sphere](./meta_sphere.png)
 
 ### Screen Shot1
 
@@ -9,6 +11,18 @@
 ### Screen Shot2
 
 ![vr-sc2](./vr-sc-2.png)
+
+### Install
+
+```
+frontend :
+npm i
+npm start
+
+backend:
+npm i
+nodemon server.js
+```
 
 ## VR WEB
 
