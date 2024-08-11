@@ -1,5 +1,15 @@
 # vr-nft-web
 
+## Web Screenshot Img
+
+### Screen Shot1
+
+![vr-sc1](./vr-sc-1.png)
+
+### Screen Shot2
+
+![vr-sc2](./vr-sc-2.png)
+
 ## VR WEB
 
 ```
