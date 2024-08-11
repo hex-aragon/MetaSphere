@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// Compatible with OpenZeppelin Contracts ^5.0.0
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -11,7 +10,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
 contract VRNFT is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Pausable, Ownable, ERC721Burnable {
     uint256 private _nextTokenId;
-    mapping(uint256 => string) private _tokenImageURIs;  // 이미지 URL을 저장할 매핑
+    mapping(uint256 => string) private _tokenImageURIs;
 
     constructor(address initialOwner)
         ERC721("VRNFT", "VRN")
@@ -30,7 +29,7 @@ contract VRNFT is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Pausable, Ow
         uint256 tokenId = _nextTokenId++;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
-        _setTokenImageURI(tokenId, imgUri);  // 이미지 URL 저장
+        _setTokenImageURI(tokenId, imgUri);
     }
 
     function _setTokenImageURI(uint256 tokenId, string memory imgUri) internal virtual {
@@ -41,7 +40,20 @@ contract VRNFT is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Pausable, Ow
         return _tokenImageURIs[tokenId];
     }
 
-    // The following functions are overrides required by Solidity.
+    function getAllTokens() public view returns (uint256[] memory, string[] memory, string[] memory) {
+        uint256 totalTokens = _nextTokenId;
+        uint256[] memory tokenIds = new uint256[](totalTokens);
+        string[] memory uris = new string[](totalTokens);
+        string[] memory imgUris = new string[](totalTokens);
+
+        for (uint256 i = 0; i < totalTokens; i++) {
+            tokenIds[i] = i;
+            uris[i] = tokenURI(i);
+            imgUris[i] = tokenImageURI(i);
+        }
+
+        return (tokenIds, uris, imgUris);
+    }
 
     function _update(address to, uint256 tokenId, address auth)
         internal

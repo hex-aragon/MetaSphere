@@ -9,9 +9,8 @@ const path = require("path");
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public")); // 정적 파일을 서빙할 디렉토리 설정
+app.use(express.static("public"));
 
-// 이미지 파일과 링크를 매핑합니다.
 const images = [
   {
     fileName: "vr360-1.jpg",
@@ -59,7 +58,6 @@ const images = [
   },
 ];
 
-// HTML 템플릿 생성 함수
 function createHTMLTemplate(imageFileName, imageLink) {
   return `
   <!DOCTYPE html>
@@ -83,7 +81,6 @@ function createHTMLTemplate(imageFileName, imageLink) {
   `;
 }
 
-// HTML 파일 생성
 images.forEach((image, index) => {
   const htmlContent = createHTMLTemplate(image.fileName, image.link);
   fs.writeFileSync(
@@ -92,10 +89,8 @@ images.forEach((image, index) => {
   );
 });
 
-// 정적 파일 제공
 app.use("/images", express.static(path.join(__dirname, "public/images")));
 
-// 각 HTML 파일에 대한 라우팅
 app.get("/image/:id", (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (id > 0 && id <= images.length) {
@@ -105,42 +100,27 @@ app.get("/image/:id", (req, res) => {
   }
 });
 
-const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS; // .env에서 주소 가져오기
-const OPTIMISM_RPC_URL = process.env.OPTIMISM_RPC_URL; // .env에서 RPC URL 가져오기
-console.log("OPTIMISM_RPC_URL", OPTIMISM_RPC_URL);
-console.log("CONTRACT_ADDRESS", CONTRACT_ADDRESS);
+const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
+const OPTIMISM_RPC_URL = process.env.OPTIMISM_RPC_URL;
 
 const provider = new ethers.providers.JsonRpcProvider(OPTIMISM_RPC_URL);
 const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, provider);
 
 app.get("/api/nfts", async (req, res) => {
   try {
-    const totalSupplyBN = await contract.totalSupply(); // BigNumber 형태로 반환
-    const totalSupply = totalSupplyBN.toNumber(); // 일반 숫자로 변환
-
-    console.log("totalSupply", totalSupply);
+    const totalSupplyBN = await contract.totalSupply();
+    const totalSupply = totalSupplyBN.toNumber();
+    const [tokenIds, uris, imgUris] = await contract.getAllTokens();
     const nfts = [];
 
-    for (let i = 1; i <= totalSupply; i++) {
-      const vrURI = await contract.tokenURI(i);
-      const imgURI = await contract.tokenImageURI(i);
-      const name = await contract.name();
-      const symbol = await contract.symbol();
-
-      console.log("vrURI", vrURI);
-      console.log("imgURI", imgURI);
-      console.log("name", name);
-      console.log("symbol", symbol);
-
+    for (let i = 0; i < totalSupply; i++) {
       nfts.push({
         id: i,
-        name: name,
-        symbol: symbol,
-        image: imgURI,
-        vrWebUri: vrURI,
+        image: imgUris[i],
+        vrWebUri: uris[i],
       });
     }
-    console.log("nfts", nfts);
+
     res.send(nfts);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -150,8 +130,6 @@ app.get("/api/nfts", async (req, res) => {
 app.get("/api/nft/:id", async (req, res) => {
   try {
     const tokenId = req.params.id;
-
-    // tokenURI가 아니라 메타데이터 자체를 반환한다고 가정
     const metadata = await contract.metadata(tokenId);
 
     res.json({ id: tokenId, metadata });
